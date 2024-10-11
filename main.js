@@ -1,47 +1,75 @@
-import './style.css'
-import * as L from 'leaflet'
-import 'leaflet/dist/leaflet.css';
+import "./style.css";
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-console.log("Hello World!")
-
-const basel_coords = [47.56059246043523, 7.590136499248171]
-const dbis_coords = [47.560191795618316, 7.587282445690428]
-const kolllegienhaus_cords = [47.558548044771115, 7.583476523204751]
-const church = [47.55632731812046, 7.591962500574559]
+const basel_coords = [47.56059246043523, 7.590136499248171];
+const dbis_coords = [47.560191795618316, 7.587282445690428];
+const kolllegienhaus_cords = [47.558548044771115, 7.583476523204751];
+const church = [47.55632731812046, 7.591962500574559];
 
 const dotIcon = L.icon({
-    iconUrl: 'shapes/dot.png',
-    shadowUrl: 'shapes/dot-shadow.png',
+  iconUrl: "shapes/dot.png",
+  shadowUrl: "shapes/dot-shadow.png",
 
-    iconSize:     [15, 15], // size of the icon
-    shadowSize:   [15, 15], // size of the shadow
-    //iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
-    //shadowAnchor: [4, 62],  // the same for the shadow
-    //popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+  iconSize: [15, 15], // size of the icon
+  shadowSize: [15, 15], // size of the shadow
+  //iconAnchor:   [0, 0], // point of the icon which will correspond to marker's location
+  //shadowAnchor: [4, 62],  // the same for the shadow
+  //popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
 });
 
-const map = L.map('map').setView(basel_coords, 13);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// Base Layers
+var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: "© OpenStreetMap",
+});
+var osmHOT = L.tileLayer(
+  "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+  {
     maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+    attribution:
+      "© OpenStreetMap contributors, Tiles style by Humanitarian OpenStreetMap Team hosted by OpenStreetMap France",
+  },
+);
 
-const markerDefault = L.marker(dbis_coords, {icon: dotIcon}).addTo(map);
-L.marker(kolllegienhaus_cords, {icon: dotIcon}).addTo(map);
+const dbisMarker = L.marker(dbis_coords, { icon: dotIcon });
+const kollegienhausMarker = L.marker(kolllegienhaus_cords, { icon: dotIcon });
 
 const geoJson = {
-    "type": "Feature",
-    "properties": {
-        "name": "Mittlere Brücke Kirchgebäude",
-        "popupContent": "Hi!"
-    },
-    "geometry": {
-        "type": "Point",
-        "coordinates": [7.5898043, 47.5600440]
-    }
+  type: "Feature",
+  properties: {
+    name: "Mittlere Brücke Kirchgebäude",
+    popupContent: "Hi!",
+  },
+  geometry: {
+    type: "Point",
+    coordinates: [7.5898043, 47.560044],
+  },
 };
-L.geoJSON(geoJson).addTo(map);
-L.marker(church).addTo(map);
+const geoJsonPoint = L.geoJSON(geoJson);
+const churchMarker = L.marker(church);
+const line = L.polyline([dbis_coords, kolllegienhaus_cords]);
 
-const line = L.polyline([dbis_coords, kolllegienhaus_cords]).addTo(map);
+const points = L.layerGroup([
+  dbisMarker,
+  kollegienhausMarker,
+  geoJsonPoint,
+  churchMarker,
+]);
+const lines = L.layerGroup([line]);
 
+const baseMaps = {
+  OpenStreetMap: osm,
+  "OpenStreetMap.HOT": osmHOT,
+};
+
+const overlayMaps = {
+  Points: points,
+  Lines: lines,
+};
+
+const map = L.map("map", { layers: [osm, points] }).setView(
+  basel_coords,
+  13,
+);
+const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
