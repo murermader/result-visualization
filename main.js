@@ -65,6 +65,21 @@ const points = L.layerGroup([
 ]);
 const other_shapes = L.layerGroup([line, polygon_kannenfeldpark]);
 
+const CanvasLayer = L.GridLayer.extend({
+  createTile: function (coords) {
+    const tile = L.DomUtil.create("canvas", "leaflet-tile");
+    const size = this.getTileSize();
+    tile.width = size.x;
+    tile.height = size.y;
+    const ctx = tile.getContext("2d");
+    ctx.strokeStyle = "red";   // Set the border color
+    ctx.lineWidth = 2;          // Set the border width
+    ctx.strokeRect(0, 0, size.x, size.y);
+    return tile;
+  },
+});
+const canvasLayerInstance = new CanvasLayer();
+
 const baseMaps = {
   OpenStreetMap: osm,
   "OpenStreetMap.HOT": osmHOT,
@@ -73,15 +88,18 @@ const baseMaps = {
 const overlayMaps = {
   Points: points,
   "Other Shapes": other_shapes,
+  "Canvas Layer": canvasLayerInstance
 };
 
 const map = L.map("map", { layers: [osm, points] }).setView(basel_coords, 13);
+
+
 
 // Open Popup with location on click
 const popup = L.popup();
 
 function onMapClick(e) {
-  console.log(e)
+  console.log(e);
   popup
     .setLatLng(e.latlng)
     .setContent(`${e.latlng.lat}, ${e.latlng.lng}`)
