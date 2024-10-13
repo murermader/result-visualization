@@ -49,6 +49,13 @@ const geoJson = {
 const geoJsonPoint = L.geoJSON(geoJson);
 const churchMarker = L.marker(church);
 const line = L.polyline([dbis_coords, kolllegienhaus_cords]);
+const polygon_kannenfeldpark = L.polygon([
+  [47.56507584522959, 7.567553245277034],
+  [47.567488799448775, 7.5710071723656185],
+  [47.56640584538745, 7.572527706774529],
+  [47.565227899037275, 7.572790483935742],
+  [47.5637839687455, 7.570387764984862],
+]);
 
 const points = L.layerGroup([
   dbisMarker,
@@ -56,7 +63,7 @@ const points = L.layerGroup([
   geoJsonPoint,
   churchMarker,
 ]);
-const lines = L.layerGroup([line]);
+const other_shapes = L.layerGroup([line, polygon_kannenfeldpark]);
 
 const baseMaps = {
   OpenStreetMap: osm,
@@ -65,11 +72,8 @@ const baseMaps = {
 
 const overlayMaps = {
   Points: points,
-  Lines: lines,
+  "Other Shapes": other_shapes,
 };
 
-const map = L.map("map", { layers: [osm, points] }).setView(
-  basel_coords,
-  13,
-);
+const map = L.map("map", { layers: [osm, points] }).setView(basel_coords, 13);
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
