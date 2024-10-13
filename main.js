@@ -76,4 +76,18 @@ const overlayMaps = {
 };
 
 const map = L.map("map", { layers: [osm, points] }).setView(basel_coords, 13);
+
+// Open Popup with location on click
+const popup = L.popup();
+
+function onMapClick(e) {
+  console.log(e)
+  popup
+    .setLatLng(e.latlng)
+    .setContent(`${e.latlng.lat}, ${e.latlng.lng}`)
+    .openOn(map);
+}
+
+map.on("click", onMapClick);
+
 const layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
