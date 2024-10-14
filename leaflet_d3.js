@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import 'dotenv/config'
 
 // Bug in leaflet.js: https://github.com/Leaflet/Leaflet/issues/4968#issuecomment-483402699
 delete L.Icon.Default.prototype._getIconUrl;
@@ -13,9 +14,17 @@ L.Icon.Default.mergeOptions({
 // Initialize Leaflet map with OSM tiles
 const map = L.map('map').setView([51.505, -0.09], 2);  // Centered around the world
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+// L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//     maxZoom: 19,
+//     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+// }).addTo(map);
+
+// JAWG (minimal)
+L.tileLayer('https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+    attribution: '<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    minZoom: 0,
+    maxZoom: 22,
+    accessToken: process.env.JAWG_ACCESS_TOKEN
 }).addTo(map);
 
 // Append an SVG layer on top of Leaflet map for D3
