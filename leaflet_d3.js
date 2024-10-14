@@ -11,15 +11,15 @@ L.Icon.Default.mergeOptions({
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-// Initialize Leaflet map with OSM tiles
 const map = L.map('map').setView([51.505, -0.09], 2);  // Centered around the world
 
+// Default tile map
 // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 //     maxZoom: 19,
 //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 // }).addTo(map);
 
-// JAWG (minimal)
+// JAWG tile map (minimal, b&w)
 L.tileLayer('https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
     attribution: '<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     minZoom: 0,
@@ -27,40 +27,30 @@ L.tileLayer('https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token={ac
     accessToken: process.env.JAWG_ACCESS_TOKEN
 }).addTo(map);
 
-// Append an SVG layer on top of Leaflet map for D3
 const svg = d3.select(map.getPanes().overlayPane).append("svg");
 const g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-// Example data (markers)
 const cities = [
     {name: "New York", coords: [40.7128, -74.006]},
     {name: "London", coords: [51.5074, -0.1276]},
     {name: "Tokyo", coords: [35.6895, 139.6917]}
 ];
 
-const tooltip = d3.select(".tooltip");
-console.log(tooltip)
-
-// Function to update positions of the D3 elements on zoom
 function update() {
     const bounds = map.getBounds();
     const topLeft = map.latLngToLayerPoint(bounds.getNorthWest());
     const bottomRight = map.latLngToLayerPoint(bounds.getSouthEast());
-
     svg.style("width", bottomRight.x - topLeft.x + "px")
         .style("height", bottomRight.y - topLeft.y + "px")
         .style("left", topLeft.x + "px")
         .style("top", topLeft.y + "px");
-
     g.attr("transform", `translate(${-topLeft.x}, ${-topLeft.y})`);
-
-    // Position circles (for example, cities) on the map
     g.selectAll("circle")
         .attr("cx", d => map.latLngToLayerPoint(d.coords).x)
         .attr("cy", d => map.latLngToLayerPoint(d.coords).y);
 }
 
-// Create D3 circles for cities
+const tooltip = d3.select(".tooltip");
 g.selectAll("circle")
     .data(cities)
     .enter()
@@ -79,5 +69,5 @@ g.selectAll("circle")
         d3.select(this).attr("r", 8);
     });
 
-map.on("moveend", update);  // Update positions when the map moves or zooms
-update();  // Initial update
+map.on("moveend", update);
+update();
