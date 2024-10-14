@@ -80,8 +80,9 @@ d3.json(uas).then(geojsonData => {
         .data(geojsonData.features)
         .enter()
         .append("path")
-        .attr("fill", "blue")
-        .attr("stroke", "black")
+        .attr("fill", "#2599cc")
+        .attr("fill-opacity", 0.8)
+        .attr("stroke", "#2c86ad")
         .attr("stroke-width", 1);
 
     // Manually generate the path string based on Leaflet projection
