@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "leaflet": "parcel leaflet.html",
+    "leaflet_d3": "parcel leaflet_d3.html",
+    "d3": "parcel d3.html"
   },
   "devDependencies": {
+    "parcel": "^2.12.0",
     "vite": "^5.4.8"
   },
   "dependencies": {

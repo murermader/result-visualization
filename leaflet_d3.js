@@ -2,6 +2,14 @@ import * as d3 from "d3";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+// Bug in leaflet.js: https://github.com/Leaflet/Leaflet/issues/4968#issuecomment-483402699
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+    iconUrl: require('leaflet/dist/images/marker-icon.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
 // Initialize Leaflet map with OSM tiles
 const map = L.map('map').setView([51.505, -0.09], 2);  // Centered around the world
 
@@ -22,6 +30,7 @@ const cities = [
 ];
 
 const tooltip = d3.select(".tooltip");
+console.log(tooltip)
 
 // Function to update positions of the D3 elements on zoom
 function update() {
