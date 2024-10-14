@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import 'dotenv/config'
+import uas from "url:./data/switzerland_uas_4326.geojson"
 
 // Bug in leaflet.js: https://github.com/Leaflet/Leaflet/issues/4968#issuecomment-483402699
 delete L.Icon.Default.prototype._getIconUrl;
@@ -68,6 +69,30 @@ g.selectAll("circle")
         tooltip.style("opacity", 0);
         d3.select(this).attr("r", 8);
     });
+
+d3.json(uas).then(geojsonData => {
+    console.log(geojsonData);
+    // Convert GeoJSON features into SVG paths
+    const geoPath = d3.geoPath().projection(function (d) {
+        // Project GeoJSON coordinates to Leaflet layer points
+        const point = map.latLngToLayerPoint(new L.LatLng(d[1], d[0]));
+        return [point.x, point.y];
+    });
+
+    // Append paths (e.g., polygons or lines) for each feature in the GeoJSON
+    g.selectAll("path")
+        .data(geojsonData.features)
+        .enter()
+        .append("path")
+        .attr("d", d => geoPath(d.geometry.coordinates))
+        .attr("fill", "blue")
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
+
+    // Update positions on map movement
+    map.on("moveend", update);
+    update();  // Initial update for first render
+});
 
 map.on("moveend", update);
 update();

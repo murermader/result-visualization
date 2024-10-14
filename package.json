@@ -6,6 +6,7 @@
   "scripts": {
     "leaflet": "parcel leaflet.html",
     "leaflet_d3": "parcel leaflet_d3.html",
+    "leaflet_d3_geojson": "parcel leaflet_d3_geojson.html",
     "d3": "parcel d3.html"
   },
   "devDependencies": {
