@@ -56,6 +56,10 @@ const polygon_kannenfeldpark = L.polygon([
   [47.565227899037275, 7.572790483935742],
   [47.5637839687455, 7.570387764984862],
 ]);
+polygon_kannenfeldpark.bindTooltip("Kannenfeldpark",
+    {direction:"center"}
+).openTooltip()
+
 
 const points = L.layerGroup([
   dbisMarker,
@@ -88,11 +92,25 @@ const baseMaps = {
 const overlayMaps = {
   Points: points,
   "Other Shapes": other_shapes,
-  "Canvas Layer": canvasLayerInstance
+  // "Canvas Layer": canvasLayerInstance
 };
 
 const map = L.map("map", { layers: [osm, points] }).setView(basel_coords, 13);
 
+document.getElementById("add-remove-layer-button").addEventListener("click", (e) => {
+  if(map.hasLayer(canvasLayerInstance)){
+    map.removeLayer(canvasLayerInstance);
+  }
+  else{
+    map.addLayer(canvasLayerInstance);
+  }
+})
+
+// Creates an invisible marker and shows a permament popup next to it. Due to the marker
+// being hidden, the popup location looks wrong.
+// const marker = new L.marker([47.56189188532641, 7.5939239013494975], { opacity: 0 }); //opacity may be set to zero
+// marker.bindTooltip("Claraplatz", {permanent: true, className: "my-label", offset: [0, 0] });
+// marker.addTo(map);
 
 
 // Open Popup with location on click
