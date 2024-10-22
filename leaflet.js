@@ -108,6 +108,7 @@ const overlayMaps = {
 const map = L.map("map", {layers: [osm, points]}).setView(basel_coords, 13);
 
 document.getElementById("add-remove-layer-button").addEventListener("click", (e) => {
+    console.log("bbutton")
     if (map.hasLayer(canvasLayerInstance)) {
         map.removeLayer(canvasLayerInstance);
     } else {

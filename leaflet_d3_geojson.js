@@ -26,35 +26,6 @@ L.tileLayer('https://tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token={ac
 const svg = d3.select(map.getPanes().overlayPane).append("svg");
 const g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
-// Data for the cities (example)
-const cities = [
-    { name: "New York", coords: [40.7128, -74.006] },
-    { name: "London", coords: [51.5074, -0.1276] },
-    { name: "Tokyo", coords: [35.6895, 139.6917] }
-];
-
-// Append circles to represent cities
-g.selectAll("circle")
-    .data(cities)
-    .enter()
-    .append("circle")
-    .attr("r", 8)
-    .attr("fill", "red")
-    .on("mouseover", function (event, d) {
-        tooltip.style("opacity", 1)
-            .style("left", (event.pageX + 5) + "px")
-            .style("top", (event.pageY - 5) + "px")
-            .html(d.name);
-        d3.select(this).attr("r", 12);
-    })
-    .on("mouseout", function () {
-        tooltip.style("opacity", 0);
-        d3.select(this).attr("r", 8);
-    });
-
-// Tooltip for city hover events
-const tooltip = d3.select(".tooltip");
-
 // Function to update city positions based on the map state
 function update() {
     g.selectAll("circle")
@@ -83,7 +54,24 @@ d3.json(uas).then(geojsonData => {
         .attr("fill", "#2599cc")
         .attr("fill-opacity", 0.8)
         .attr("stroke", "#2c86ad")
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1)
+        // TODO: box intersection always true?
+        // .filter(d => {
+        //     const bbox = L.latLngBounds(
+        //         [8.281288106122878, 47.246810733013476], // SW corner of feature
+        //         [8.737644767926998, 47.566365143710556],  // NE corner of feature
+        //     );
+        //     const featureBbox = d3.geoBounds(d);
+        //     const featureLatLngBounds = L.latLngBounds(
+        //         [featureBbox[0][1], featureBbox[0][0]], // SW corner of feature
+        //         [featureBbox[1][1], featureBbox[1][0]]  // NE corner of feature
+        //     );
+        //     console.log(d)
+        //     console.log(bbox.intersects(featureLatLngBounds))
+        //     return bbox.intersects(featureLatLngBounds);
+        // })
+        // .attr("fill", "red")  // Change the fill to blue for filtered paths
+        // .attr("stroke", "red");  // Optionally, change the stroke color too
 
     // Manually generate the path string based on Leaflet projection
     function projectPoint(coords) {
@@ -113,7 +101,55 @@ d3.json(uas).then(geojsonData => {
 
     update();  // Initial update for first render
     updatePaths();
+    updateRectangle(); // Update the rectangle position on map changes
 });
+
+// Rectangle coordinates
+const lowerLeft = [47.246810733013476, 8.281288106122878]; // [latitude, longitude]
+const upperRight = [47.566365143710556, 8.737644767926998]; // [latitude, longitude]
+
+// Function to add the rectangle to the map
+function addRectangle() {
+    // Project the geographic coordinates to pixel coordinates in the map's current view
+    const lowerLeftPoint = map.latLngToLayerPoint(lowerLeft);
+    const upperRightPoint = map.latLngToLayerPoint(upperRight);
+
+    // Define width and height of the rectangle
+    const width = upperRightPoint.x - lowerLeftPoint.x;
+    const height = lowerLeftPoint.y - upperRightPoint.y;
+
+    // Add the rectangle to the SVG layer
+    g.append("rect")
+        .attr("x", lowerLeftPoint.x)
+        .attr("y", upperRightPoint.y) // y is the top-left corner, so we use upperRightPoint for that
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "none")  // No fill, just an outline
+        .attr("stroke", "red")  // Red outline
+        .attr("stroke-width", 2);  // Stroke thickness
+}
+
+// Function to update the rectangle position on map movement
+function updateRectangle() {
+    const lowerLeftPoint = map.latLngToLayerPoint(lowerLeft);
+    const upperRightPoint = map.latLngToLayerPoint(upperRight);
+
+    const width = upperRightPoint.x - lowerLeftPoint.x;
+    const height = lowerLeftPoint.y - upperRightPoint.y;
+
+    // Get the map's current translation (topLeft corner of the map view)
+    const bounds = map.getBounds();
+    const topLeft = map.latLngToLayerPoint(bounds.getNorthWest());
+
+    // Update the rectangle's position relative to the transformed SVG group (g)
+    g.selectAll("rect")
+        .attr("x", lowerLeftPoint.x - topLeft.x)
+        .attr("y", upperRightPoint.y - topLeft.y)
+        .attr("width", width)
+        .attr("height", height);
+}
+
 
 // Initial update to position the cities and the GeoJSON
 update();
+addRectangle();
