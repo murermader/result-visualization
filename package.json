@@ -7,7 +7,9 @@
     "leaflet": "parcel leaflet.html",
     "leaflet_d3": "parcel leaflet_d3.html",
     "leaflet_d3_geojson": "parcel leaflet_d3_geojson.html",
-    "d3": "parcel d3.html"
+    "d3": "parcel d3.html",
+    "ol": "parcel openlayers.html",
+    "old3": "parcel openlayers_d3.html"
   },
   "devDependencies": {
     "parcel": "^2.12.0",

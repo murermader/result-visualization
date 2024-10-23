@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimized OpenLayers with D3 and GeoJSON</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol/ol.css" type="text/css">
+    <style>
+        #map {
+            width: 100%;
+            height: 700px;
+            position: relative;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.1s ease-out;
+            pointer-events: none;
+        }
+
+        /* Hides the SVG when the map is moving */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<h2>OpenLayers with D3 Shapes from GeoJSON (Optimized)</h2>
+<div id="map"></div>
+
+<!-- OpenLayers JS -->
+<script src="https://cdn.jsdelivr.net/npm/ol/dist/ol.js"></script>
+<!-- D3 JS -->
+<script src="https://d3js.org/d3.v6.min.js"></script>
+
+<script type="module">
+    import uas from "url:./data/switzerland_uas_4326.geojson"
+
+    // Initialize OpenLayers Map
+    const map = new ol.Map({
+        target: 'map',
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([0, 0]),  // Center at lon-lat [0, 0]
+            zoom: 2
+        })
+    });
+
+    // Create an SVG container overlay
+    const svg = d3.select('#map').append('svg').classed('hidden', true); // Initially hidden
+    const g = svg.append('g');  // Group element for D3 shapes
+
+    d3.json(uas).then(function(geojson) {
+        // Function to project geo-coordinates to pixel coordinates in the map
+        function projectPoint(coordinate) {
+            const point = ol.proj.fromLonLat(coordinate);  // Transform from lon-lat to Web Mercator
+            const pixel = map.getPixelFromCoordinate(point);  // Get pixel coordinates in the map view
+            return pixel;
+        }
+
+        // Function to update the D3 shapes on the map (sync with OpenLayers)
+        function updateD3Shapes() {
+            // Bind GeoJSON data to D3 and create/update shapes
+            const features = g.selectAll('path')
+                .data(geojson.features);
+
+            // Enter new shapes (polygons)
+            features.enter().append('path')
+                .attr('fill', 'rgba(0, 128, 255, 0.6)')  // Light blue fill
+                .attr('stroke', 'black')
+                .attr('stroke-width', 0.5);
+
+            // Update existing shapes
+            features.attr('d', function(d) {
+                const coordinates = d.geometry.coordinates[0];
+                const projected = coordinates.map(projectPoint);
+                return d3.line()(projected);
+            });
+
+            // Remove old shapes
+            features.exit().remove();
+        }
+
+        // Function to hide shapes (e.g., during map movement)
+        function hideD3Shapes() {
+            svg.classed('hidden', true);  // Hide the SVG
+        }
+
+        // Function to show and update shapes (e.g., after movement stops)
+        function showD3Shapes() {
+            svg.classed('hidden', false);  // Show the SVG
+            updateD3Shapes();  // Update the shape positions
+        }
+
+        // Map interaction event listeners
+        map.on('movestart', hideD3Shapes);  // Hide shapes when map starts moving
+        map.on('moveend', showD3Shapes);    // Re-render and show shapes when map stops moving
+
+        // Initial rendering of shapes
+        updateD3Shapes();
+    }).catch(function(error) {
+        console.error('Error loading GeoJSON:', error);
+    });
+</script>
+</body>
+</html>

@@ -28,10 +28,6 @@ const g = svg.append("g").attr("class", "leaflet-zoom-hide");
 
 // Function to update city positions based on the map state
 function update() {
-    g.selectAll("circle")
-        .attr("cx", d => map.latLngToLayerPoint(d.coords).x)
-        .attr("cy", d => map.latLngToLayerPoint(d.coords).y);
-
     // Sync the SVG with the map bounds
     const bounds = map.getBounds();
     const topLeft = map.latLngToLayerPoint(bounds.getNorthWest());
